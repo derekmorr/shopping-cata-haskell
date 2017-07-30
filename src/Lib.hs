@@ -1,9 +1,47 @@
-module Lib
-    ( price
-    ) where
+module Lib where
 
-price :: String -> Int
-price ""     = 0
-price "A"    = 50
-price "AB"   = 80
-price "CDBA" = 115
+import           Data.List       (find, group, sort)
+import qualified Data.Map.Strict as Map
+
+data MultiPrice = MultiPrice {
+    qty    :: Int
+  , mprice :: Int
+} deriving (Eq, Show)
+
+data PriceData = PriceData {
+    itemPrices  :: Map.Map Char Int
+  , multiPrices :: Map.Map Char MultiPrice
+} deriving (Eq, Show)
+
+checkout :: PriceData -> String -> Int
+checkout pd basket = sum partialTotals
+  where groupedItems = mkItemLists basket
+        chunkedItems = concatMap (splitItems pd) groupedItems
+        partialTotals = fmap (cp pd) chunkedItems
+
+mkItemLists :: String -> [String]
+mkItemLists = group . sort
+
+-- shamelessly stolen from Data.List.Grouping
+-- | partitions list into sub-lists of length given by the Int:
+splitEvery :: Int -> [a] -> [[a]]
+splitEvery _ [] = []
+splitEvery n xs = as : splitEvery n bs
+     where (as,bs) = splitAt n xs
+
+cp :: PriceData -> String -> Int
+cp pd str = chunkPrice ip mp str
+    where ip = itemPrices pd Map.! head str
+          mp = Map.lookup (head str) (multiPrices pd)
+
+chunkPrice :: Int -> Maybe MultiPrice -> String -> Int
+chunkPrice ip Nothing s = length s * ip
+chunkPrice ip (Just mp) s
+    | length s == qty mp = mprice mp
+    | otherwise          = length s * ip
+
+-- splits grouped strings into multiprice-sized chunks if there's a multiprice
+splitItems :: PriceData -> String -> [String]
+splitItems pd str = case Map.lookup (head str) (multiPrices pd) of
+    Just (MultiPrice q _) -> splitEvery q str
+    Nothing               -> [str]
