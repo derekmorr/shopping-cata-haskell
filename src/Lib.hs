@@ -1,7 +1,8 @@
 module Lib where
 
-import           Data.List       (find, group, sort)
-import qualified Data.Map.Strict as Map
+import           Data.List          (find, group, sort)
+import           Data.List.Grouping (splitEvery)
+import qualified Data.Map.Strict    as Map
 
 data MultiPrice = MultiPrice {
     qty    :: Int
@@ -21,13 +22,6 @@ checkout pd basket = sum partialTotals
 
 mkItemLists :: String -> [String]
 mkItemLists = group . sort
-
--- shamelessly stolen from Data.List.Grouping
--- | partitions list into sub-lists of length given by the Int:
-splitEvery :: Int -> [a] -> [[a]]
-splitEvery _ [] = []
-splitEvery n xs = as : splitEvery n bs
-     where (as,bs) = splitAt n xs
 
 cp :: PriceData -> String -> Int
 cp pd str = chunkPrice ip mp str
@@ -71,3 +65,9 @@ checkout'' :: PriceData -> String -> Int
 checkout'' pd basket = foldr f 0 itemCounts
     where itemCounts = Map.toList $ countPerItem basket
           f skuCount total = total + totalPerItem pd skuCount
+
+-- same as checkout'' but point free
+checkout''' :: PriceData -> String -> Int
+checkout''' pd basket = foldr f 0 itemCounts
+    where itemCounts = Map.toList $ countPerItem basket
+          f = (+) . totalPerItem pd

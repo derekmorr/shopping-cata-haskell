@@ -44,3 +44,5 @@ main = hspec $
       mapM_ (totalsSpec checkout') totalsExamples
     describe "shoping cart - checkout''" $ do
       mapM_ (totalsSpec checkout'') totalsExamples
+    describe "shoping cart - checkout'''" $ do
+      mapM_ (totalsSpec checkout''') totalsExamples
