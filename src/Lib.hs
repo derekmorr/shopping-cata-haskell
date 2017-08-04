@@ -63,6 +63,11 @@ totalPerItem pd (sku, count) = subTotal count iprice mp
 
 checkout' :: PriceData -> String -> Int
 checkout' pd basket = sum subTotals
-    where xs        = Map.toList $ countPerItem basket
-          subTotals = fmap (totalPerItem pd) xs
+    where itemCounts = Map.toList $ countPerItem basket
+          subTotals  = fmap (totalPerItem pd) itemCounts
 
+-- same as checkout' but avoid building an intermediate map
+checkout'' :: PriceData -> String -> Int
+checkout'' pd basket = foldr f 0 itemCounts
+    where itemCounts = Map.toList $ countPerItem basket
+          f skuCount total = total + totalPerItem pd skuCount
