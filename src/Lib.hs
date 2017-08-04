@@ -45,3 +45,24 @@ splitItems :: PriceData -> String -> [String]
 splitItems pd str = case Map.lookup (head str) (multiPrices pd) of
     Just (MultiPrice q _) -> splitEvery q str
     Nothing               -> [str]
+
+-- second implementation
+
+countPerItem :: String -> Map.Map Char Int
+countPerItem basket = Map.fromListWith (+) [(c, 1) | c <- basket]
+
+subTotal :: Int -> Int -> Maybe MultiPrice -> Int
+subTotal count iprice Nothing   = iprice * count
+subTotal count iprice (Just mp) = count `div` q * mprice mp + count `rem` q * iprice
+    where q = qty mp
+
+totalPerItem :: PriceData -> (Char, Int) -> Int
+totalPerItem pd (sku, count) = subTotal count iprice mp
+    where iprice = itemPrices pd Map.! sku
+          mp     = Map.lookup sku (multiPrices pd)
+
+checkout' :: PriceData -> String -> Int
+checkout' pd basket = sum subTotals
+    where xs        = Map.toList $ countPerItem basket
+          subTotals = fmap (totalPerItem pd) xs
+

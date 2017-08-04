@@ -2,20 +2,6 @@ import qualified Data.Map.Strict as Map
 import           Lib
 import           Test.Hspec
 
--- priceData :: PriceData
--- priceData = PriceData {
---   itemPrices = [
---     ItemPrice { isku = 'A', iprice = 50 }
---   , ItemPrice { isku = 'B', iprice = 20 }
---   , ItemPrice { isku = 'C', iprice = 20 }
---   , ItemPrice { isku = 'D', iprice = 15 }
---   ],
---   multiPrices = [
---     MultiPrice { msku = 'A', qty = 3, mprice = 130 }
---   , MultiPrice { msku = 'B', qty = 2, mprice = 45 }
---   ]
--- }
-
 priceData :: PriceData
 priceData = PriceData {
     itemPrices = Map.fromList [ ('A', 50), ('B', 30), ('C', 20), ('D', 15) ]
@@ -24,20 +10,6 @@ priceData = PriceData {
     , ('B', MultiPrice { qty = 2, mprice = 45 })
   ]
 }
-
--- priceData :: PriceData
--- priceData = PriceData {
---   itemPrices = [
---     ('A', 50)
---   , ('B', 20)
---   , ('C', 20)
---   , ('D', 15)
---   ],
---   multiPrices = [
---     ('A', 3, 130)
---   , ('B', 2, 45)
---   ]
--- }
 
 totalsExamples :: [(String, Int)]
 totalsExamples =
@@ -58,14 +30,15 @@ totalsExamples =
   , ("DABABA", 190)
   ]
 
-totalsSpec :: (String, Int) -> Spec
-totalsSpec (item, expectedPrice) =
-  -- it ("price of " ++ item) $
+totalsSpec :: (PriceData -> String -> Int) -> (String, Int) -> Spec
+totalsSpec f (item, expectedPrice) =
   it item $
-    checkout priceData item `shouldBe` expectedPrice
+    f priceData item `shouldBe` expectedPrice
 
 main :: IO ()
 main = hspec $
-  describe "shopping cart" $ do
-    mapM_ totalsSpec totalsExamples
-
+  describe "blah" $ do
+    describe "shopping cart - checkout" $ do
+      mapM_ (totalsSpec checkout) totalsExamples
+    describe "shoping cart - checkout'" $ do
+      mapM_ (totalsSpec checkout') totalsExamples
