@@ -2,7 +2,7 @@ import qualified Data.Map.Strict as Map
 import           Lib
 import           Test.Hspec
 
-priceData :: PriceData
+priceData :: PriceData Char
 priceData = PriceData {
     itemPrices = Map.fromList [ ('A', 50), ('B', 30), ('C', 20), ('D', 15) ]
   , multiPrices = Map.fromList [
@@ -30,7 +30,7 @@ totalsExamples =
   , ("DABABA", 190)
   ]
 
-totalsSpec :: (PriceData -> String -> Int) -> (String, Int) -> Spec
+totalsSpec :: (PriceData Char -> String -> Int) -> (String, Int) -> Spec
 totalsSpec f (item, expectedPrice) =
   it item $
     f priceData item `shouldBe` expectedPrice
